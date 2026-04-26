@@ -1,0 +1,9 @@
+{
+  "repo_name": "localflow-public-nodes",
+  "repo_url": "https://github.com/lilinfangrelax/localflow-public-nodes",
+  "snapshot_version": "1.0.0",
+  "snapshot_commit": "",
+  "nodes": [
+    "public_demo"
+  ]
+}
