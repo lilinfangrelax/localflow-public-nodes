@@ -1,0 +1,13 @@
+{
+  "node_type": "sqlite_connect",
+  "name": "SQLite连接",
+  "description": "连接SQLite数据库",
+  "category": "数据库",
+  "version": "1.0.0",
+  "entry_file": "node.py",
+  "dependencies": [],
+  "config_schema": {
+    "db_path": {"type": "string", "label": "数据库路径"},
+    "connection_name": {"type": "string", "label": "连接名称"}
+  }
+}

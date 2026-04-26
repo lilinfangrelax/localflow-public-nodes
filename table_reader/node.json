@@ -1,0 +1,18 @@
+{
+  "node_type": "table_reader",
+  "name": "表格读取",
+  "description": "读取 Excel 或 CSV 文件并输出结构化表格数据",
+  "category": "表格处理",
+  "version": "1.0.0",
+  "entry_file": "node.py",
+  "dependencies": ["openpyxl", "pandas", "xlrd"],
+  "config_schema": {
+    "file_path": {"type": "string", "label": "文件路径"},
+    "file_type": {"type": "enum", "label": "文件类型", "options": ["auto", "excel", "csv"], "default": "auto"},
+    "sheet_name": {"type": "string", "label": "Sheet 名称", "default": ""},
+    "header_row": {"type": "int", "label": "表头行", "default": 0},
+    "encoding": {"type": "string", "label": "CSV 编码", "default": "utf-8-sig"},
+    "skip_empty_rows": {"type": "bool", "label": "跳过空行", "default": true},
+    "output_var": {"type": "string", "label": "输出变量", "default": "table_data"}
+  }
+}

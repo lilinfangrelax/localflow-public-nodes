@@ -1,0 +1,14 @@
+{
+  "node_type": "variable_assign",
+  "name": "变量赋值",
+  "description": "创建变量并赋值",
+  "category": "变量操作",
+  "version": "1.0.0",
+  "entry_file": "node.py",
+  "dependencies": [],
+  "config_schema": {
+    "variable_name": {"type": "string", "label": "变量名"},
+    "value": {"type": "string", "label": "值"},
+    "value_type": {"type": "enum", "options": ["str", "int", "float", "bool", "json"], "label": "类型"}
+  }
+}

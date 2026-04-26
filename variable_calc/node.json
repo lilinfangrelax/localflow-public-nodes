@@ -1,0 +1,13 @@
+{
+  "node_type": "variable_calc",
+  "name": "变量计算",
+  "description": "使用表达式计算变量",
+  "category": "变量操作",
+  "version": "1.0.0",
+  "entry_file": "node.py",
+  "dependencies": [],
+  "config_schema": {
+    "expression": {"type": "string", "label": "表达式"},
+    "output_var": {"type": "string", "label": "输出变量"}
+  }
+}

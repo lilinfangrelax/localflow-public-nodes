@@ -1,0 +1,13 @@
+{
+  "node_type": "sql_statement",
+  "name": "SQL语句",
+  "description": "构建SQL查询语句",
+  "category": "数据库",
+  "version": "1.0.0",
+  "entry_file": "node.py",
+  "dependencies": [],
+  "config_schema": {
+    "sql": {"type": "text", "label": "SQL语句"},
+    "output_var": {"type": "string", "label": "输出变量"}
+  }
+}
