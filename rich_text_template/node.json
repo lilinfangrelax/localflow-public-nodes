@@ -1,0 +1,15 @@
+{
+  "node_type": "rich_text_template",
+  "name": "富文本模板",
+  "description": "编辑富文本内容，支持HTML格式，通过{{变量名}}替换变量，运行后自动复制到剪贴板",
+  "category": "文本处理",
+  "version": "1.0.0",
+  "entry_file": "node.py",
+  "dependencies": ["pyperclip"],
+  "config_schema": {
+    "rich_text": {"type": "richtext", "label": "富文本内容", "default": ""},
+    "data_var": {"type": "string", "label": "数据变量", "default": ""},
+    "missing_key_mode": {"type": "enum", "label": "缺失变量处理", "options": ["keep_placeholder", "empty", "error"], "default": "keep_placeholder"},
+    "output_var": {"type": "string", "label": "输出变量", "default": "rendered_html"}
+  }
+}
