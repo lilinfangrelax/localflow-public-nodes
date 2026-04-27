@@ -8,6 +8,7 @@
     "demo_node",
     "playwright_script",
     "public_demo",
+    "rich_text_template",
     "sql_statement",
     "sqlite_connect",
     "sqlite_execute",
@@ -15,6 +16,7 @@
     "table_reader",
     "text_template_render",
     "variable_assign",
-    "variable_calc"
+    "variable_calc",
+    "web_collector"
   ]
 }
