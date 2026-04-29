@@ -11,5 +11,17 @@
     "data_var": {"type": "string", "label": "数据变量", "default": ""},
     "missing_key_mode": {"type": "enum", "label": "缺失变量处理", "options": ["keep_placeholder", "empty", "error"], "default": "keep_placeholder"},
     "output_var": {"type": "string", "label": "输出变量", "default": "rendered_text"}
-  }
+  },
+  "examples": [
+    {
+      "title": "邮件模板",
+      "description": "用变量替换生成个性化邮件内容",
+      "config": {"template_text": "尊敬的{{name}}，您的订单{{order_id}}已发货，预计{{delivery_date}}到达。", "data_var": "order_data", "output_var": "rendered_text"}
+    },
+    {
+      "title": "报告摘要",
+      "description": "生成带统计数据的摘要文本",
+      "config": {"template_text": "本月销售额：{{total_sales}}元，同比增长{{growth_rate}}%", "data_var": "stats_data", "missing_key_mode": "empty", "output_var": "rendered_text"}
+    }
+  ]
 }

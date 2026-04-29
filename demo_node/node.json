@@ -8,5 +8,17 @@
   "dependencies": [],
   "config_schema": {
     "greeting": {"type": "string", "label": "问候语", "default": "Hello LocalFlow!"}
-  }
+  },
+  "examples": [
+    {
+      "title": "默认问候",
+      "description": "使用默认问候语",
+      "config": {"greeting": "Hello LocalFlow!"}
+    },
+    {
+      "title": "自定义问候",
+      "description": "设置中文问候语",
+      "config": {"greeting": "你好，世界！"}
+    }
+  ]
 }

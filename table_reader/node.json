@@ -14,5 +14,22 @@
     "encoding": {"type": "string", "label": "CSV 编码", "default": "utf-8-sig"},
     "skip_empty_rows": {"type": "bool", "label": "跳过空行", "default": true},
     "output_var": {"type": "string", "label": "输出变量", "default": "table_data"}
-  }
+  },
+  "examples": [
+    {
+      "title": "读取Excel文件",
+      "description": "自动识别格式，读取销售数据 Excel",
+      "config": {"file_path": "data/sales.xlsx", "file_type": "auto", "output_var": "table_data"}
+    },
+    {
+      "title": "读取指定Sheet",
+      "description": "读取 Excel 中名为「1月」的 Sheet",
+      "config": {"file_path": "data/report.xlsx", "file_type": "excel", "sheet_name": "1月", "output_var": "table_data"}
+    },
+    {
+      "title": "读取CSV文件",
+      "description": "读取 GBK 编码的 CSV 文件",
+      "config": {"file_path": "data/contacts.csv", "file_type": "csv", "encoding": "gbk", "output_var": "table_data"}
+    }
+  ]
 }

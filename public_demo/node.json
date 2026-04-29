@@ -12,5 +12,17 @@
       "label": "问候语",
       "default": "Hello from public-demo!"
     }
-  }
+  },
+  "examples": [
+    {
+      "title": "默认问候",
+      "description": "使用默认问候语",
+      "config": {"greeting": "Hello from public-demo!"}
+    },
+    {
+      "title": "自定义问候",
+      "description": "设置自定义问候语",
+      "config": {"greeting": "Hello World!"}
+    }
+  ]
 }

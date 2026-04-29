@@ -13,5 +13,17 @@
     "paste_hotkey": {"type": "string", "label": "粘贴快捷键", "default": "ctrl+v"},
     "send_hotkey": {"type": "string", "label": "发送快捷键", "default": "enter"},
     "output_var": {"type": "string", "label": "输出变量", "default": "send_result"}
-  }
+  },
+  "examples": [
+    {
+      "title": "发送到聊天窗口",
+      "description": "将渲染后的文本粘贴并按回车发送",
+      "config": {"text_var": "rendered_text", "pre_paste_delay_ms": 500, "send_hotkey": "enter", "output_var": "send_result"}
+    },
+    {
+      "title": "粘贴到输入框",
+      "description": "仅粘贴不发送，适用于需要人工确认的场景",
+      "config": {"text_var": "rendered_text", "send_hotkey": "", "output_var": "send_result"}
+    }
+  ]
 }

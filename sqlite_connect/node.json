@@ -9,5 +9,17 @@
   "config_schema": {
     "db_path": {"type": "string", "label": "数据库路径"},
     "connection_name": {"type": "string", "label": "连接名称"}
-  }
+  },
+  "examples": [
+    {
+      "title": "连接本地数据库",
+      "description": "连接当前目录下的 mydata.db 数据库",
+      "config": {"db_path": "mydata.db", "connection_name": "my_db"}
+    },
+    {
+      "title": "连接绝对路径数据库",
+      "description": "连接指定路径的数据库文件",
+      "config": {"db_path": "C:/data/project.db", "connection_name": "project_db"}
+    }
+  ]
 }

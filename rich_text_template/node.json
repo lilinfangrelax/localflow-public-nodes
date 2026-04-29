@@ -11,5 +11,17 @@
     "data_var": {"type": "string", "label": "数据变量", "default": ""},
     "missing_key_mode": {"type": "enum", "label": "缺失变量处理", "options": ["keep_placeholder", "empty", "error"], "default": "keep_placeholder"},
     "output_var": {"type": "string", "label": "输出变量", "default": "rendered_html"}
-  }
+  },
+  "examples": [
+    {
+      "title": "HTML邮件模板",
+      "description": "生成带样式的HTML邮件内容",
+      "config": {"rich_text": "<h2>{{title}}</h2><p>尊敬的{{name}}，感谢您的购买！</p>", "data_var": "email_data", "output_var": "rendered_html"}
+    },
+    {
+      "title": "报告模板",
+      "description": "生成带数据表格的HTML报告",
+      "config": {"rich_text": "<h3>月度报告</h3><p>日期：{{date}}，金额：{{amount}}元</p>", "data_var": "report_data", "missing_key_mode": "empty", "output_var": "rendered_html"}
+    }
+  ]
 }

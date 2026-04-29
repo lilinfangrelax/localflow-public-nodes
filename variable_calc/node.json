@@ -9,5 +9,22 @@
   "config_schema": {
     "expression": {"type": "string", "label": "表达式"},
     "output_var": {"type": "string", "label": "输出变量"}
-  }
+  },
+  "examples": [
+    {
+      "title": "简单加法",
+      "description": "计算 100 + 200 的结果",
+      "config": {"expression": "100 + 200", "output_var": "sum_result"}
+    },
+    {
+      "title": "引用变量计算",
+      "description": "基于已有变量 price 和 quantity 计算总价",
+      "config": {"expression": "price * quantity", "output_var": "total_price"}
+    },
+    {
+      "title": "条件表达式",
+      "description": "使用三元表达式判断折扣",
+      "config": {"expression": "0.8 if total > 1000 else 1.0", "output_var": "discount"}
+    }
+  ]
 }
