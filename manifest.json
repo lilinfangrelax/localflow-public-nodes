@@ -1,22 +1,9 @@
 {
   "repo_name": "localflow-public-nodes",
   "repo_url": "https://github.com/lilinfangrelax/localflow-public-nodes",
-  "snapshot_version": "1.0.2",
-  "snapshot_commit": "714ef949e57782414eedef5876fa8d0a0ae8d20e",
+  "snapshot_version": "2.0.0",
+  "snapshot_commit": "",
   "nodes": [
-    "clipboard_send",
-    "demo_node",
-    "playwright_script",
-    "public_demo",
-    "rich_text_template",
-    "sql_statement",
-    "sqlite_connect",
-    "sqlite_execute",
-    "table_aggregate",
-    "table_reader",
-    "text_template_render",
-    "variable_assign",
-    "variable_calc",
-    "web_collector"
+    "playwright_script"
   ]
 }
