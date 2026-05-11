@@ -1,13 +1,67 @@
 {
   "node_type": "playwright_script",
   "name": "Playwright",
-  "description": "执行可参数化的 Python Playwright 脚本",
+  "description": "执行可参数化的 Python Playwright 脚本，支持自动下载文件、截图和页面数据采集",
   "category": "浏览器自动化",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "entry_file": "node.py",
   "dependencies": ["playwright"],
   "metadata": {"node_kind": "playwright_script"},
+  "config_schema": {
+    "playwright_auto_download": {
+      "type": "bool",
+      "label": "自动下载文件",
+      "default": true,
+      "description": "自动等待下载完成、保存文件并读取内容"
+    },
+    "playwright_headless": {
+      "type": "bool",
+      "label": "无头模式",
+      "default": false
+    },
+    "playwright_timeout_seconds": {
+      "type": "int",
+      "label": "超时时间(秒)",
+      "default": 120
+    },
+    "playwright_download_dir": {
+      "type": "string",
+      "label": "下载目录",
+      "default": "",
+      "placeholder": "为空时自动创建临时目录"
+    },
+    "playwright_artifacts_dir": {
+      "type": "string",
+      "label": "产物目录",
+      "default": "",
+      "placeholder": "为空时自动创建临时目录"
+    }
+  },
+  "input_schema": {},
+  "output_schema": {
+    "downloads": {
+      "type": "array",
+      "description": "下载文件路径列表"
+    },
+    "download_contents": {
+      "type": "object",
+      "description": "下载文件内容（JSON/文本），按文件名索引"
+    },
+    "structured_output": {
+      "type": "object",
+      "description": "脚本通过 lf_set_output() 设置的结构化输出"
+    },
+    "artifacts": {
+      "type": "object",
+      "description": "脚本通过 lf_add_artifact() 注册的产物"
+    }
+  },
   "examples": [
+    {
+      "title": "下载文件",
+      "description": "访问指定页面并下载文件，系统自动保存到下载目录",
+      "config": {"url": "https://example.com/download"}
+    },
     {
       "title": "打开网页截图",
       "description": "访问指定URL并截取页面图片保存到本地",
