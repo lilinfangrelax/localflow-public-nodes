@@ -9,7 +9,12 @@
     "playwright>=1.40.0,<1.47.0"
   ],
   "metadata": {
-    "node_kind": "playwright_script"
+    "node_kind": "playwright_script",
+    "file_hashes": {
+      "node.py": "dadbae23fcbb9ae9019737c9981c541399afcdb074ad9304b014ca386d06f887",
+      "utils.py": "bdef7e92605f63c00f39159d7cc0c38c7487fbb46691931542b949cb5f300136",
+      "dialog.py": "6d5db4ce1c5259f0618052cdc6cf28d431c83e6eae054ef32447f2b408e041bc"
+    }
   },
   "config_schema": {
     "playwright_auto_download": {
