@@ -3,7 +3,7 @@
   "name": "Playwright",
   "description": "执行可参数化的 Python Playwright 脚本，支持自动下载文件、截图和页面数据采集",
   "category": "浏览器自动化",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "entry_file": "node.py",
   "dependencies": [
     "playwright"
@@ -39,6 +39,13 @@
       "label": "产物目录",
       "default": "",
       "placeholder": "为空时自动创建临时目录"
+    },
+    "playwright_browser_channel": {
+      "type": "string",
+      "label": "浏览器通道",
+      "default": "",
+      "placeholder": "留空用内置浏览器，填 chrome / msedge",
+      "description": "使用本地安装的浏览器，避免下载 Playwright 内置浏览器"
     }
   },
   "input_schema": {},

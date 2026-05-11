@@ -1,9 +1,5 @@
 """
-Playwright 脚本节点 — 工具函数和扩展点
-
-通过 node.json registrations 字段注册到引擎：
-  - schema_builder: build_playwright_config_schema
-  - bootstrap_hook: _playwright_bootstrap_hook
+Playwright 脚本节点辅助工具
 """
 import json
 import re
@@ -17,10 +13,9 @@ PLAYWRIGHT_RUNTIME_FIELDS = (
     "playwright_download_dir",
     "playwright_artifacts_dir",
     "playwright_auto_download",
+    "playwright_browser_channel",
 )
 
-
-# ── 工具函数 ──────────────────────────────────────────────
 
 def extract_playwright_params(script_source: str) -> List[str]:
     """从脚本中提取 {{param_name}} 占位符"""
@@ -81,6 +76,13 @@ def build_playwright_config_schema(
             "default": True,
             "description": "自动等待下载完成、保存文件并读取内容",
         },
+        "playwright_browser_channel": {
+            "type": "string",
+            "label": "浏览器通道",
+            "default": "",
+            "placeholder": "留空用内置浏览器，填 chrome / msedge 等",
+            "description": "使用本地安装的浏览器（如 chrome），避免下载 Playwright 内置浏览器",
+        },
     }
 
     for key, default_schema in runtime_defaults.items():
@@ -90,6 +92,22 @@ def build_playwright_config_schema(
         schema[key] = merged
 
     return schema
+
+
+def is_playwright_node(node_metadata: Dict | None) -> bool:
+    """判断节点是否为 Playwright 脚本节点"""
+    metadata = node_metadata or {}
+    return metadata.get("node_kind") == "playwright_script"
+
+
+def get_playwright_param_names_from_schema(config_schema: Dict | None) -> List[str]:
+    """从 schema 中提取业务参数，排除运行时字段"""
+    config_schema = config_schema or {}
+    return [
+        key
+        for key in config_schema.keys()
+        if key not in PLAYWRIGHT_RUNTIME_FIELDS
+    ]
 
 
 def build_playwright_default_config(existing_config: Dict | None = None) -> Dict:
@@ -116,15 +134,13 @@ def build_playwright_default_config(existing_config: Dict | None = None) -> Dict
         elif "default" in field_schema:
             config[key] = field_schema.get("default")
 
-    # 保留其它未知字段
+    # 保留其它未知字段，避免未来扩展或旧工作流数据被吞掉。
     for key, value in existing_config.items():
         if key not in config:
             config[key] = value
 
     return config
 
-
-# ── BootstrapHook：生成完整的 execute() ──────────────────
 
 def build_playwright_inline_wrapper_source(
     script_source: str, param_names: List[str]
@@ -186,6 +202,7 @@ def build_playwright_inline_wrapper_source(
         "    if auto_download is None:",
         "        auto_download = self.config.get('playwright_auto_read_downloads', True)",
         "    auto_download = _as_bool(auto_download)",
+        "    browser_channel = str(self.config.get('playwright_browser_channel', '') or '').strip()",
         "",
         "    runtime_root = Path(__file__).resolve().parent / f'{Path(__file__).stem}_playwright'",
         "    runtime_root.mkdir(parents=True, exist_ok=True)",
@@ -199,6 +216,7 @@ def build_playwright_inline_wrapper_source(
         "",
         "    if download_dir_value:",
         "        unsafe_dir = Path(download_dir_value).expanduser().resolve()",
+        "        # 安全性检查：确保下载目录在工作区或用户主目录范围内",
         "        home = Path.home()",
         "        try:",
         "            unsafe_dir.relative_to(runtime_root)",
@@ -245,7 +263,7 @@ def build_playwright_inline_wrapper_source(
         "        '    if data is None:',",
         "        '        data = {}',",
         "        '    if not isinstance(data, dict):',",
-        "        '        raise TypeError(\"lf_set_output need dict\")',",
+        "        '        raise TypeError(\"lf_set_output 需要 dict\")',",
         "        '    merged = dict(data)',",
         "        '    merged.update(kwargs)',",
         "        '    LF_OUTPUT = merged',",
@@ -273,19 +291,19 @@ def build_playwright_inline_wrapper_source(
         "        '            if _stable_since is None:',",
         "        '                _stable_since = time.time()',",
         "        '            elif time.time() - _stable_since >= min_stable_seconds:',",
-        "        '                lf_log(f\"下载稳定，共{_current_count}个文件\")',",
+        "        '                lf_log(f\"下载稳定，共 {_current_count} 个文件\")',",
         "        '                return list(_download_dir.iterdir())',",
         "        '        else:',",
         "        '            _stable_since = None',",
         "        '        _last_count = _current_count',",
         "        '        time.sleep(0.5)',",
-        "        '    lf_log(f\"下载等待超时\")',",
+        "        '    lf_log(f\"下载等待超时，已获取 {_last_count if _last_count >= 0 else 0} 个文件\")',",
         "        '    return list(_download_dir.iterdir()) if _download_dir.exists() else []',",
         "        '',",
         "        'def lf_read_file(file_path, encoding=\"utf-8\", max_size_mb=10):',",
         "        '    _path = Path(file_path)',",
         "        '    if not _path.exists():',",
-        "        '        raise FileNotFoundError(f\"{file_path}\")',",
+        "        '        raise FileNotFoundError(f\"文件不存在: {file_path}\")',",
         "        '    _size_mb = _path.stat().st_size / (1024 * 1024)',",
         "        '    if _size_mb > max_size_mb:',",
         "        '        return None',",
@@ -327,7 +345,7 @@ def build_playwright_inline_wrapper_source(
         "        '        LF_DOWNLOAD_EVENTS.append({\"path\": _save_path, \"name\": download.suggested_filename})',",
         "        '        lf_log(f\"下载完成: {_save_path}\")',",
         "        '    except Exception as _e:',",
-        "        '        print(f\"[localflow] auto save download failed: {_e}\")',",
+        "        '        print(f\"[localflow] 自动保存下载失败: {_e}\")',",
         "        '',",
         "        'def _lf_patch_page(page):',",
         "        '    page.on(\"download\", _lf_auto_handle_download)',",
@@ -351,7 +369,7 @@ def build_playwright_inline_wrapper_source(
         "    ])",
         "",
         "    auto_patch = '''",
-        "# auto intercept Playwright download events",
+        "# 自动拦截 Playwright 下载事件，无需用户手动处理",
         "try:",
         "    from playwright.sync_api import sync_playwright",
         "    _orig_playwright = sync_playwright",
@@ -383,13 +401,14 @@ def build_playwright_inline_wrapper_source(
         "import time",
         "from pathlib import Path",
         "",
-        "# auto wait downloads",
+        "# 自动等待下载完成",
         "if LF_AUTO_DOWNLOAD:",
         "    lf_download_wait(timeout=LF_TIMEOUT_SECONDS)",
         "else:",
         "    time.sleep(1)",
         "",
         "_download_root = Path(LF_DOWNLOAD_DIR)",
+        "# 排除 .crdownload 临时文件",
         "_raw_files = sorted(",
         "    [",
         "        path for path in _download_root.iterdir()",
@@ -427,6 +446,7 @@ def build_playwright_inline_wrapper_source(
         "        \"headless\": LF_HEADLESS,",
         "        \"timeout_seconds\": LF_TIMEOUT_SECONDS,",
         "        \"auto_download\": LF_AUTO_DOWNLOAD,",
+        "        \"browser_channel\": LF_BROWSER_CHANNEL,",
         "    },",
         "}",
         "print(\"###JSON_OUTPUT###\")",
@@ -454,10 +474,10 @@ def build_playwright_inline_wrapper_source(
         "    payload, script_log = _parse_json_payload(process.stdout or '')",
         "    if process.returncode != 0:",
         "        error_message = (process.stderr or script_log or process.stdout or '').strip()",
-        '        raise RuntimeError(error_message or "Playwright script execution failed")',
+        '        raise RuntimeError(error_message or "Playwright 脚本执行失败")',
         "",
         "    if payload is None:",
-        '        raise RuntimeError("Playwright script did not output JSON result")',
+        '        raise RuntimeError("Playwright 脚本未输出标准 JSON 结果")',
         "",
         "    result = {**input_data, **payload}",
         "    if script_log:",
@@ -478,11 +498,12 @@ def build_playwright_wrapper_source(script_path, param_names: List[str]) -> str:
         script_source = script_path.read_text(encoding="utf-8")
     return build_playwright_inline_wrapper_source(script_source, param_names)
 
-
-# ── 扩展点注册 ───────────────────────────────────────────
-
-def _playwright_bootstrap_hook(config: dict) -> str:
-    """BootstrapHook: 从 config 生成完整的 execute() 函数体"""
-    script_source = config.get("script_source", "")
+# -- auto register extensions --
+def _pw_bootstrap_hook(config):
+    script_source = config.get('script_source', '')
     param_names = extract_playwright_params(script_source)
     return build_playwright_inline_wrapper_source(script_source, param_names)
+
+from src.core.node_extension_registries import schema_builders, bootstrap_hooks
+schema_builders.register('playwright_script', build_playwright_config_schema)
+bootstrap_hooks.register('playwright_script', _pw_bootstrap_hook)
