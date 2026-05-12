@@ -6,7 +6,7 @@ import os
 import shutil
 import tempfile
 
-from PySide6.QtCore import Qt, QProcess
+from PySide6.QtCore import Qt, QEventLoop, QProcess
 from PySide6.QtGui import QFont, QAction
 from PySide6.QtWidgets import (
     QDialog,
@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QListWidget,
     QMenu,
     QMessageBox,
+    QProgressDialog,
     QPushButton,
     QPlainTextEdit,
     QVBoxLayout,
@@ -374,24 +375,44 @@ class PlaywrightScriptDialog(QDialog):
 
         # 执行安装（使用 uv，项目包管理统一用 uv）
         try:
+            from PySide6.QtCore import QEventLoop
+
             uv_path = shutil.which("uv") or "uv"
             install_cmd = [uv_path, "pip", "install", "playwright"]
-            self.validation_label.setText("正在使用 uv 安装 playwright...")
-            # 用 QProcess 执行安装，避免阻塞 UI
+
+            # 进度对话框（不确定进度 = 旋转条）
+            progress = QProgressDialog("正在使用 uv 安装 playwright...", "取消", 0, 0, self)
+            progress.setWindowTitle("安装 Playwright")
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
+            progress.setMinimumDuration(0)
+            progress.show()
+
+            # 启动安装进程
             install_proc = QProcess(self)
             install_proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
+
+            # 用事件循环等待，不阻塞 UI
+            loop = QEventLoop(self)
+            install_proc.finished.connect(loop.quit)
+            progress.canceled.connect(loop.quit)
+
             install_proc.start(install_cmd[0], install_cmd[1:])
             if not install_proc.waitForStarted(5000):
+                progress.close()
                 QMessageBox.warning(self, "安装失败", "无法启动 uv 安装进程。")
                 self.validation_label.setText("")
                 return False
 
-            # 等待安装完成（最多 120 秒）
-            if not install_proc.waitForFinished(120000):
+            # 事件循环等待（UI 保持响应）
+            loop.exec()
+
+            if progress.wasCanceled():
                 install_proc.kill()
-                QMessageBox.warning(self, "安装超时", "Playwright 安装超时，请手动执行: uv pip install playwright")
+                progress.close()
                 self.validation_label.setText("")
                 return False
+
+            progress.close()
 
             output = install_proc.readAll().data().decode("utf-8", errors="replace")
             if install_proc.exitCode() != 0:
@@ -435,7 +456,7 @@ class PlaywrightScriptDialog(QDialog):
             "codegen",
             "--target", "python",
             "-o", self._record_temp_path,
-            "--browser", "chromium",
+            "--browser", "chrome",
         ]
         url = url.strip()
         if url and url != "https://":
