@@ -366,29 +366,30 @@ class PlaywrightScriptDialog(QDialog):
         reply = QMessageBox.question(
             self, "安装 Playwright",
             "录制功能需要 Playwright，是否现在安装？\n\n"
-            "将执行: pip install playwright",
+            "将执行: uv pip install playwright",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply != QMessageBox.StandardButton.Yes:
             return False
 
-        # 执行安装
+        # 执行安装（使用 uv，项目包管理统一用 uv）
         try:
-            pip_cmd = [sys.executable, "-m", "pip", "install", "playwright"]
-            self.validation_label.setText("正在安装 playwright...")
+            uv_path = shutil.which("uv") or "uv"
+            install_cmd = [uv_path, "pip", "install", "playwright"]
+            self.validation_label.setText("正在使用 uv 安装 playwright...")
             # 用 QProcess 执行安装，避免阻塞 UI
             install_proc = QProcess(self)
             install_proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
-            install_proc.start(pip_cmd[0], pip_cmd[1:])
+            install_proc.start(install_cmd[0], install_cmd[1:])
             if not install_proc.waitForStarted(5000):
-                QMessageBox.warning(self, "安装失败", "无法启动 pip 安装进程。")
+                QMessageBox.warning(self, "安装失败", "无法启动 uv 安装进程。")
                 self.validation_label.setText("")
                 return False
 
             # 等待安装完成（最多 120 秒）
             if not install_proc.waitForFinished(120000):
                 install_proc.kill()
-                QMessageBox.warning(self, "安装超时", "Playwright 安装超时，请手动执行: pip install playwright")
+                QMessageBox.warning(self, "安装超时", "Playwright 安装超时，请手动执行: uv pip install playwright")
                 self.validation_label.setText("")
                 return False
 
@@ -396,7 +397,7 @@ class PlaywrightScriptDialog(QDialog):
             if install_proc.exitCode() != 0:
                 QMessageBox.warning(
                     self, "安装失败",
-                    f"pip install playwright 失败:\n{output[:500]}"
+                    f"uv pip install playwright 失败:\n{output[:500]}"
                 )
                 self.validation_label.setText("")
                 return False
