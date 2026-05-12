@@ -456,7 +456,8 @@ class PlaywrightScriptDialog(QDialog):
             "codegen",
             "--target", "python",
             "-o", self._record_temp_path,
-            "--browser", "chrome",
+            "--browser", "chromium",
+            "--channel", "chrome",
         ]
         url = url.strip()
         if url and url != "https://":
