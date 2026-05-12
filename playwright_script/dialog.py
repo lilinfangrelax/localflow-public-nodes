@@ -3,6 +3,7 @@ Playwright 脚本编辑弹窗
 """
 import ast
 import os
+import shutil
 import tempfile
 
 from PySide6.QtCore import Qt, QProcess
@@ -342,8 +343,78 @@ class PlaywrightScriptDialog(QDialog):
         except Exception as exc:
             QMessageBox.warning(self, "脚本校验失败", str(exc))
 
+    def _check_and_install_playwright(self) -> bool:
+        """检查 playwright CLI 是否可用，不可用时尝试自动安装"""
+        import subprocess, sys, shutil
+
+        # 检查 playwright 命令是否存在
+        pw_path = shutil.which("playwright")
+        if pw_path:
+            # 再检查 playwright codegen 子命令是否可用
+            try:
+                r = subprocess.run(
+                    [pw_path, "--version"],
+                    capture_output=True, text=True, encoding="utf-8", errors="replace",
+                    timeout=10,
+                )
+                if r.returncode == 0:
+                    return True
+            except Exception:
+                pass
+
+        # playwright 不可用，询问是否安装
+        reply = QMessageBox.question(
+            self, "安装 Playwright",
+            "录制功能需要 Playwright，是否现在安装？\n\n"
+            "将执行: pip install playwright",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return False
+
+        # 执行安装
+        try:
+            pip_cmd = [sys.executable, "-m", "pip", "install", "playwright"]
+            self.validation_label.setText("正在安装 playwright...")
+            # 用 QProcess 执行安装，避免阻塞 UI
+            install_proc = QProcess(self)
+            install_proc.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
+            install_proc.start(pip_cmd[0], pip_cmd[1:])
+            if not install_proc.waitForStarted(5000):
+                QMessageBox.warning(self, "安装失败", "无法启动 pip 安装进程。")
+                self.validation_label.setText("")
+                return False
+
+            # 等待安装完成（最多 120 秒）
+            if not install_proc.waitForFinished(120000):
+                install_proc.kill()
+                QMessageBox.warning(self, "安装超时", "Playwright 安装超时，请手动执行: pip install playwright")
+                self.validation_label.setText("")
+                return False
+
+            output = install_proc.readAll().data().decode("utf-8", errors="replace")
+            if install_proc.exitCode() != 0:
+                QMessageBox.warning(
+                    self, "安装失败",
+                    f"pip install playwright 失败:\n{output[:500]}"
+                )
+                self.validation_label.setText("")
+                return False
+
+            QMessageBox.information(self, "安装成功", "Playwright 已安装，可以开始录制。")
+            self.validation_label.setText("")
+            return True
+
+        except Exception as e:
+            QMessageBox.warning(self, "安装出错", str(e))
+            self.validation_label.setText("")
+            return False
+
     def _start_recording(self):
         """启动 Playwright Codegen 录制"""
+        if not self._check_and_install_playwright():
+            return
+
         url, ok = QInputDialog.getText(
             self,
             "录制 Playwright 脚本",
